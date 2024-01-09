@@ -4,21 +4,37 @@ defmodule Kaling.Redirects do
   """
 
   import Ecto.Query, warn: false
+  import Kaling.Sqids
   alias Kaling.Repo
 
   alias Kaling.Redirects.Redirect
+  alias Kaling.Accounts.User
+
+  @doc """
+  Resolves the redirect resource from the given `%Redirect{}` struct.
+  """
+  def resolve_redirect(%Redirect{} = redirect) do
+    redirect
+    |> Map.put_new(
+      :short_url,
+      KalingWeb.Endpoint.url() <> "/r/" <> encode!([redirect.id])
+    )
+  end
 
   @doc """
   Returns the list of redirects.
 
   ## Examples
 
-      iex> list_redirects()
+      iex> list_redirects(user)
       [%Redirect{}, ...]
 
   """
-  def list_redirects do
-    Repo.all(Redirect)
+  def list_redirects(%User{} = user) do
+    Redirect
+    |> where([r], r.user_id == ^user.id)
+    |> Repo.all()
+    |> Enum.map(&resolve_redirect/1)
   end
 
   @doc """
@@ -28,28 +44,55 @@ defmodule Kaling.Redirects do
 
   ## Examples
 
-      iex> get_redirect!(123)
+      iex> get_redirect!(123, user)
       %Redirect{}
 
-      iex> get_redirect!(456)
+      iex> get_redirect!(456, user)
       ** (Ecto.NoResultsError)
 
   """
-  def get_redirect!(id), do: Repo.get!(Redirect, id)
+  def get_redirect!(id, %User{} = user) do
+    Redirect
+    |> where([r], r.user_id == ^user.id)
+    |> Repo.get!(id)
+    |> resolve_redirect()
+  end
+
+  @doc """
+  Gets a single redirect by its hashed id.
+
+  Raises `Ecto.NoResultsError` if the Redirect does not exist.
+
+  ## Examples
+
+      iex> get_hashed_redirect!("abc")
+      %Redirect{}
+
+      iex> get_hashed_redirect!("def")
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_hashed_redirect!(hashed_id) do
+    [id] = decode!(hashed_id)
+
+    Repo.get!(Redirect, id)
+  end
 
   @doc """
   Creates a redirect.
 
   ## Examples
 
-      iex> create_redirect(%{field: value})
+      iex> create_redirect(user, %{field: value})
       {:ok, %Redirect{}}
 
-      iex> create_redirect(%{field: bad_value})
+      iex> create_redirect(user, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_redirect(attrs \\ %{}) do
+  def create_redirect(%User{} = user, attrs \\ %{}) do
+    attrs = Map.put_new(attrs, :user_id, user.id)
+
     %Redirect{}
     |> Redirect.changeset(attrs)
     |> Repo.insert()
@@ -60,17 +103,21 @@ defmodule Kaling.Redirects do
 
   ## Examples
 
-      iex> update_redirect(redirect, %{field: new_value})
+      iex> update_redirect(redirect, user, %{field: new_value})
       {:ok, %Redirect{}}
 
-      iex> update_redirect(redirect, %{field: bad_value})
+      iex> update_redirect(redirect, user, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_redirect(%Redirect{} = redirect, attrs) do
-    redirect
-    |> Redirect.changeset(attrs)
-    |> Repo.update()
+  def update_redirect(%Redirect{} = redirect, %User{} = user, attrs) do
+    if redirect.user_id == user.id do
+      redirect
+      |> Redirect.changeset(attrs)
+      |> Repo.update()
+    else
+      {:error, "You are not authorized to update this redirect."}
+    end
   end
 
   @doc """
@@ -78,15 +125,19 @@ defmodule Kaling.Redirects do
 
   ## Examples
 
-      iex> delete_redirect(redirect)
+      iex> delete_redirect(redirect, user)
       {:ok, %Redirect{}}
 
-      iex> delete_redirect(redirect)
+      iex> delete_redirect(redirect, user)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_redirect(%Redirect{} = redirect) do
-    Repo.delete(redirect)
+  def delete_redirect(%Redirect{} = redirect, %User{} = user) do
+    if redirect.user_id == user.id do
+      Repo.delete(redirect)
+    else
+      {:error, "You are not authorized to delete this redirect."}
+    end
   end
 
   @doc """
