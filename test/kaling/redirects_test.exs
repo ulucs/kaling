@@ -7,52 +7,116 @@ defmodule Kaling.RedirectsTest do
     alias Kaling.Redirects.Redirect
 
     import Kaling.RedirectsFixtures
+    import Kaling.AccountsFixtures
 
     @invalid_attrs %{redirect_to: nil}
 
-    test "list_redirects/0 returns all redirects" do
-      redirect = redirect_fixture()
-      assert Redirects.list_redirects() == [redirect]
+    test "list_redirects/1 returns all redirects of user" do
+      user = user_fixture()
+      redirect = redirect_fixture(user)
+
+      assert [redirect] == Redirects.list_redirects(user)
     end
 
-    test "get_redirect!/1 returns the redirect with given id" do
-      redirect = redirect_fixture()
-      assert Redirects.get_redirect!(redirect.id) == redirect
+    test "list_redirects/1 returns empty list if user has no redirects" do
+      user = user_fixture()
+
+      assert [] == Redirects.list_redirects(user)
     end
 
-    test "create_redirect/1 with valid data creates a redirect" do
+    test "list_redirects/1 does not return redirects of other users" do
+      user = user_fixture()
+      other_user = user_fixture()
+      redirect = redirect_fixture(other_user)
+
+      assert [] == Redirects.list_redirects(user)
+    end
+
+    test "get_redirect!/2 returns the redirect with given id" do
+      user = user_fixture()
+      redirect = redirect_fixture(user)
+
+      assert Redirects.get_redirect!(redirect.id, user) == redirect
+    end
+
+    test "get_redirect!/2 raises Ecto.NoResultsError if redirect does not exist" do
+      user = user_fixture()
+
+      assert_raise Ecto.NoResultsError, fn -> Redirects.get_redirect!(123, user) end
+    end
+
+    test "get_redirect!/2 raises Ecto.NoResultsError if redirect belongs to other user" do
+      user = user_fixture()
+      other_user = user_fixture()
+      redirect = redirect_fixture(other_user)
+
+      assert_raise Ecto.NoResultsError, fn -> Redirects.get_redirect!(redirect.id, user) end
+    end
+
+    test "create_redirect/2 with valid data creates a redirect belonging to the user" do
+      user = user_fixture()
       valid_attrs = %{redirect_to: "some redirect_to"}
 
-      assert {:ok, %Redirect{} = redirect} = Redirects.create_redirect(valid_attrs)
+      assert {:ok, %Redirect{} = redirect} = Redirects.create_redirect(valid_attrs, user)
       assert redirect.redirect_to == "some redirect_to"
+      assert redirect.user_id == user.id
     end
 
-    test "create_redirect/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Redirects.create_redirect(@invalid_attrs)
+    test "create_redirect/2 with invalid data returns error changeset" do
+      user = user_fixture()
+      assert {:error, %Ecto.Changeset{}} = Redirects.create_redirect(@invalid_attrs, user)
     end
 
-    test "update_redirect/2 with valid data updates the redirect" do
-      redirect = redirect_fixture()
+    test "update_redirect/3 with valid data updates the redirect" do
+      user = user_fixture()
+      redirect = redirect_fixture(user)
       update_attrs = %{redirect_to: "some updated redirect_to"}
 
-      assert {:ok, %Redirect{} = redirect} = Redirects.update_redirect(redirect, update_attrs)
+      assert {:ok, %Redirect{} = redirect} =
+               Redirects.update_redirect(redirect, user, update_attrs)
+
       assert redirect.redirect_to == "some updated redirect_to"
     end
 
-    test "update_redirect/2 with invalid data returns error changeset" do
-      redirect = redirect_fixture()
-      assert {:error, %Ecto.Changeset{}} = Redirects.update_redirect(redirect, @invalid_attrs)
-      assert redirect == Redirects.get_redirect!(redirect.id)
+    test "update_redirect/3 with invalid data returns error changeset" do
+      user = user_fixture()
+      redirect = redirect_fixture(user)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Redirects.update_redirect(redirect, user, @invalid_attrs)
+
+      assert redirect == Redirects.get_redirect!(redirect.id, user)
     end
 
-    test "delete_redirect/1 deletes the redirect" do
-      redirect = redirect_fixture()
-      assert {:ok, %Redirect{}} = Redirects.delete_redirect(redirect)
+    test "update_redirect/3 returns error if redirect belongs to another user" do
+      user = user_fixture()
+      other_user = user_fixture()
+      redirect = redirect_fixture(other_user)
+
+      assert {:error, _} =
+               Redirects.update_redirect(redirect, user, %{
+                 redirect_to: "some updated redirect_to"
+               })
+    end
+
+    test "delete_redirect/1 deletes the redirect if it belongs to the user" do
+      user = user_fixture()
+      redirect = redirect_fixture(user)
+      assert {:ok, %Redirect{}} = Redirects.delete_redirect(redirect, user)
       assert_raise Ecto.NoResultsError, fn -> Redirects.get_redirect!(redirect.id) end
     end
 
+    test "delete_redirect/1 returns error if redirect belongs to another user" do
+      user = user_fixture()
+      other_user = user_fixture()
+      redirect = redirect_fixture(other_user)
+
+      assert {:error, _} = Redirects.delete_redirect(redirect, user)
+    end
+
     test "change_redirect/1 returns a redirect changeset" do
-      redirect = redirect_fixture()
+      user = user_fixture()
+      redirect = redirect_fixture(user)
       assert %Ecto.Changeset{} = Redirects.change_redirect(redirect)
     end
   end
