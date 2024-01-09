@@ -68,6 +68,13 @@ defmodule KalingWeb.Router do
       on_mount: [{KalingWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+
+      live "/redirects", RedirectLive.Index, :index
+      live "/redirects/new", RedirectLive.Index, :new
+      live "/redirects/:id/edit", RedirectLive.Index, :edit
+
+      live "/redirects/:id", RedirectLive.Show, :show
+      live "/redirects/:id/show/edit", RedirectLive.Show, :edit
     end
   end
 

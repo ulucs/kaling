@@ -1,0 +1,26 @@
+<.header>
+  Redirect <%= @redirect.id %>
+  <:subtitle>This is a redirect record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/redirects/#{@redirect}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit redirect</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Redirect to"><%= @redirect.redirect_to %></:item>
+</.list>
+
+<.back navigate={~p"/redirects"}>Back to redirects</.back>
+
+<.modal :if={@live_action == :edit} id="redirect-modal" show on_cancel={JS.patch(~p"/redirects/#{@redirect}")}>
+  <.live_component
+    module={KalingWeb.RedirectLive.FormComponent}
+    id={@redirect.id}
+    title={@page_title}
+    action={@live_action}
+    redirect={@redirect}
+    patch={~p"/redirects/#{@redirect}"}
+  />
+</.modal>

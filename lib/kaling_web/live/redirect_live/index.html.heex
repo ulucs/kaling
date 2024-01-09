@@ -1,0 +1,41 @@
+<.header>
+  Listing Redirects
+  <:actions>
+    <.link patch={~p"/redirects/new"}>
+      <.button>New Redirect</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="redirects"
+  rows={@streams.redirects}
+  row_click={fn {_id, redirect} -> JS.navigate(~p"/redirects/#{redirect}") end}
+>
+  <:col :let={{_id, redirect}} label="Redirect to"><%= redirect.redirect_to %></:col>
+  <:action :let={{_id, redirect}}>
+    <div class="sr-only">
+      <.link navigate={~p"/redirects/#{redirect}"}>Show</.link>
+    </div>
+    <.link patch={~p"/redirects/#{redirect}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, redirect}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: redirect.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="redirect-modal" show on_cancel={JS.patch(~p"/redirects")}>
+  <.live_component
+    module={KalingWeb.RedirectLive.FormComponent}
+    id={@redirect.id || :new}
+    title={@page_title}
+    action={@live_action}
+    redirect={@redirect}
+    patch={~p"/redirects"}
+  />
+</.modal>
