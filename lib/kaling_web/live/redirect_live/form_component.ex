@@ -30,7 +30,7 @@ defmodule KalingWeb.RedirectLive.FormComponent do
 
   @impl true
   def update(%{redirect: redirect} = assigns, socket) do
-    changeset = Redirects.change_redirect(redirect)
+    changeset = Redirects.change_redirect(redirect, assigns.current_user)
 
     {:ok,
      socket
@@ -42,7 +42,7 @@ defmodule KalingWeb.RedirectLive.FormComponent do
   def handle_event("validate", %{"redirect" => redirect_params}, socket) do
     changeset =
       socket.assigns.redirect
-      |> Redirects.change_redirect(redirect_params)
+      |> Redirects.change_redirect(socket.assigns.current_user, redirect_params)
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
@@ -53,7 +53,11 @@ defmodule KalingWeb.RedirectLive.FormComponent do
   end
 
   defp save_redirect(socket, :edit, redirect_params) do
-    case Redirects.update_redirect(socket.assigns.redirect, redirect_params) do
+    case Redirects.update_redirect(
+           socket.assigns.redirect,
+           socket.assigns.current_user,
+           redirect_params
+         ) do
       {:ok, redirect} ->
         notify_parent({:saved, redirect})
 
@@ -68,7 +72,7 @@ defmodule KalingWeb.RedirectLive.FormComponent do
   end
 
   defp save_redirect(socket, :new, redirect_params) do
-    case Redirects.create_redirect(redirect_params) do
+    case Redirects.create_redirect(socket.assigns.current_user, redirect_params) do
       {:ok, redirect} ->
         notify_parent({:saved, redirect})
 

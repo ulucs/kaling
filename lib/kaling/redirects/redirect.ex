@@ -11,9 +11,10 @@ defmodule Kaling.Redirects.Redirect do
   end
 
   @doc false
-  def changeset(redirect, attrs) do
+  def changeset(redirect, user, attrs) do
     redirect
     |> cast(attrs, [:redirect_to])
-    |> validate_required([:redirect_to])
+    |> cast(%{user_id: user.id}, [:user_id])
+    |> validate_required([:redirect_to, :user_id])
   end
 end

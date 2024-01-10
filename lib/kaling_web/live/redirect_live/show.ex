@@ -13,7 +13,7 @@ defmodule KalingWeb.RedirectLive.Show do
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:redirect, Redirects.get_redirect!(id))}
+     |> assign(:redirect, Redirects.get_redirect!(id, socket.assigns.current_user))}
   end
 
   defp page_title(:show), do: "Show Redirect"

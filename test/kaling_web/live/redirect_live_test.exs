@@ -5,16 +5,15 @@ defmodule KalingWeb.RedirectLiveTest do
   import Kaling.RedirectsFixtures
   import Kaling.AccountsFixtures
 
-  alias Kaling.Accounts.User
-
   @create_attrs %{redirect_to: "some redirect_to"}
   @update_attrs %{redirect_to: "some updated redirect_to"}
   @invalid_attrs %{redirect_to: nil}
 
-  defp create_redirect(_) do
+  defp create_redirect(%{conn: conn}) do
     user = user_fixture()
     redirect = redirect_fixture(user)
-    %{redirect: redirect, user: user}
+
+    %{redirect: redirect, conn: log_in_user(conn, user)}
   end
 
   describe "Index" do

@@ -8,12 +8,9 @@ defmodule Kaling.RedirectsFixtures do
   Generate a redirect.
   """
   def redirect_fixture(user, attrs \\ %{}) do
-    {:ok, redirect} =
-      attrs
-      |> Enum.into(%{
-        redirect_to: "some redirect_to"
-      })
-      |> Kaling.Redirects.create_redirect(user)
+    attrs = Enum.into(attrs, %{redirect_to: "some redirect_to"})
+
+    {:ok, redirect} = Kaling.Redirects.create_redirect(user, attrs)
 
     redirect
   end

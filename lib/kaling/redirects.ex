@@ -91,10 +91,8 @@ defmodule Kaling.Redirects do
 
   """
   def create_redirect(%User{} = user, attrs \\ %{}) do
-    attrs = Map.put_new(attrs, :user_id, user.id)
-
     %Redirect{}
-    |> Redirect.changeset(attrs)
+    |> Redirect.changeset(user, attrs)
     |> Repo.insert()
   end
 
@@ -113,7 +111,7 @@ defmodule Kaling.Redirects do
   def update_redirect(%Redirect{} = redirect, %User{} = user, attrs) do
     if redirect.user_id == user.id do
       redirect
-      |> Redirect.changeset(attrs)
+      |> Redirect.changeset(user, attrs)
       |> Repo.update()
     else
       {:error, "You are not authorized to update this redirect."}
@@ -145,11 +143,11 @@ defmodule Kaling.Redirects do
 
   ## Examples
 
-      iex> change_redirect(redirect)
+      iex> change_redirect(redirect, user)
       %Ecto.Changeset{data: %Redirect{}}
 
   """
-  def change_redirect(%Redirect{} = redirect, attrs \\ %{}) do
-    Redirect.changeset(redirect, attrs)
+  def change_redirect(%Redirect{} = redirect, user, attrs \\ %{}) do
+    Redirect.changeset(redirect, user, attrs)
   end
 end
