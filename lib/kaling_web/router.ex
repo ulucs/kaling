@@ -21,6 +21,7 @@ defmodule KalingWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/r/:hash", RedirectHtml, :get
   end
 
   # Other scopes may use custom stacks.
