@@ -5,6 +5,8 @@ defmodule Kaling.Redirects.Redirect do
 
   schema "redirects" do
     field :redirect_to, :string
+    field :short_url, :string, virtual: true
+
     belongs_to :user, User
 
     timestamps()
