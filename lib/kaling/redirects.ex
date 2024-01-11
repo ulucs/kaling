@@ -75,7 +75,7 @@ defmodule Kaling.Redirects do
   """
   def get_hashed_redirect!(hashed_id) do
     Redirect
-    |> Repo.get!(decode(hashed_id))
+    |> Repo.get!(decode!(hashed_id))
     |> resolve_redirect()
   end
 
