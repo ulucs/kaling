@@ -5,6 +5,7 @@ defmodule Kaling.Redirects do
 
   import Ecto.Query, warn: false
   import Kaling.Sqids
+  import Kaling.Monad
   alias Kaling.Repo
 
   alias Kaling.Redirects.Redirect
@@ -96,6 +97,7 @@ defmodule Kaling.Redirects do
     %Redirect{}
     |> Redirect.changeset(user, attrs)
     |> Repo.insert()
+    |> map_e(&resolve_redirect/1)
   end
 
   @doc """
@@ -115,6 +117,7 @@ defmodule Kaling.Redirects do
       redirect
       |> Redirect.changeset(user, attrs)
       |> Repo.update()
+      |> map_e(&resolve_redirect/1)
     else
       {:error, "You are not authorized to update this redirect."}
     end

@@ -1,5 +1,14 @@
+
+<div class="grid grid-cols-2 gap-8">
+
+<%= @link_graph %>
+
+<%= @ua_graph %>
+
+<div class=" col-span-2">
+
 <.header>
-  Listing events in real-time
+  Listing events in real-time, newest first, up to 10 events
 </.header>
 
 <.table
@@ -14,3 +23,6 @@
   <:col :let={{_id, event}} label="Redirected To"><%= event.redirect_to %></:col>
 </.table>
 
+</div>
+
+</div>
