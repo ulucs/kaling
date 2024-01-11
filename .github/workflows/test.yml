@@ -1,0 +1,33 @@
+name: Tests
+
+on: pull_request
+
+jobs:
+  tests_and_coverage:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        elixir: [1.15]
+        otp: [26]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: erlef/setup-elixir@v1
+        with:
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
+      - name: Install Mix depencies
+        run: mix deps.get
+      - name: ====> test
+        run: mix coveralls.html
+    services:
+      postgres:
+        image: postgres:14
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: ulucs # cba editing config/test.exs
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
