@@ -1,0 +1,16 @@
+<.header>
+  Listing events in real-time
+</.header>
+
+<.table
+  id="redirects"
+  rows={@streams.events}
+>
+  <:col :let={{_id, event}} label="Timestamp"><%= event.created_at %></:col>
+  <:col :let={{_id, event}} label="User IP"><%= event.ip %></:col>
+  <:col :let={{_id, event}} label="User Agent"><%= event.headers["user-agent"] %></:col>
+  <:col :let={{_id, event}} label="Referrer"><%= event.headers["referer"] %></:col>
+  <:col :let={{_id, event}} label="Redirected From"><%= event.redirected_from %></:col>
+  <:col :let={{_id, event}} label="Redirected To"><%= event.redirect_to %></:col>
+</.table>
+

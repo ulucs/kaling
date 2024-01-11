@@ -9,7 +9,8 @@ defmodule Kaling.Analytics.Event do
           cookies: map(),
           redirected_from: String.t(),
           redirect_to: String.t(),
-          user_id: integer()
+          user_id: integer(),
+          created_at: DateTime.t()
         }
 
   schema "events" do

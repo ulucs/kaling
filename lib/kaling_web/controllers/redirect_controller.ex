@@ -4,6 +4,7 @@ defmodule KalingWeb.RedirectHtml do
 
   def get(conn, %{"hash" => hash}) do
     redirect = get_hashed_redirect!(hash)
+    GenServer.cast(Kaling.Analytics.Server, {:record_event, %{conn: conn, redirect: redirect}})
 
     redirect(conn, external: redirect.redirect_to)
   end

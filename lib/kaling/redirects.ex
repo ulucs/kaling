@@ -15,7 +15,7 @@ defmodule Kaling.Redirects do
   """
   def resolve_redirect(%Redirect{} = redirect) do
     redirect
-    |> Map.put_new(
+    |> Map.put(
       :short_url,
       KalingWeb.Endpoint.url() <> "/r/" <> encode!([redirect.id])
     )
@@ -75,7 +75,9 @@ defmodule Kaling.Redirects do
   def get_hashed_redirect!(hashed_id) do
     [id] = decode!(hashed_id)
 
-    Repo.get!(Redirect, id)
+    Redirect
+    |> Repo.get!(id)
+    |> resolve_redirect()
   end
 
   @doc """

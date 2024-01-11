@@ -45,13 +45,19 @@ defmodule Kaling.Analytics.Server do
   @impl true
   def handle_cast({:record_event, %{conn: conn, redirect: redirect}}, state) do
     event = initialize_event(conn, redirect)
-    PubSub.broadcast(Kaling.PubSub, "events:user:#{event.user_id}", event)
+    PubSub.broadcast(Kaling.PubSub, "events:user:#{event.user_id}", {:new_event, event})
+    state = %{state | collected: [event | state.collected]}
 
     if Enum.count(state.collected) >= state.max_collection do
       send_writes(state)
     else
-      {:noreply, %{state | collected: [event | state.collected]}}
+      {:noreply, state}
     end
+  end
+
+  @impl true
+  def handle_call({:list_events, user_id}, _from, state) do
+    {:reply, Enum.filter(state.collected, &(&1.user_id == user_id)), state}
   end
 
   @impl true

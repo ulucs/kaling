@@ -20,7 +20,6 @@ defmodule KalingWeb.Router do
   scope "/", KalingWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
     get "/r/:hash", RedirectHtml, :get
   end
 
@@ -59,6 +58,7 @@ defmodule KalingWeb.Router do
       live "/users/reset_password/:token", UserResetPasswordLive, :edit
     end
 
+    get "/", PageController, :home
     post "/users/log_in", UserSessionController, :create
   end
 
@@ -76,6 +76,8 @@ defmodule KalingWeb.Router do
 
       live "/redirects/:id", RedirectLive.Show, :show
       live "/redirects/:id/show/edit", RedirectLive.Show, :edit
+
+      live "/events", EventsLive.Index, :index
     end
   end
 
