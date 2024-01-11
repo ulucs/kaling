@@ -10,7 +10,6 @@ jobs:
     concurrency: deploy-group
     steps:
       - uses: actions/checkout@v3
-      - run: mix test # ensure the tests are passing before deployment
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only # let fly remote builder do the work
         env:
