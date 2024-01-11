@@ -1,7 +1,6 @@
-defmodule Kaling.Sqids do
-  import Sqids.Hacks, only: [dialyzed_ctx: 1]
-  @context Sqids.new!()
+defmodule Kaling.Hashing do
+  @settings Hashids.new()
 
-  def encode!(numbers), do: Sqids.encode!(dialyzed_ctx(@context), numbers)
-  def decode!(id), do: Sqids.decode!(dialyzed_ctx(@context), id)
+  def encode(number), do: Hashids.encode(@settings, number)
+  def decode(hash), do: Hashids.decode(@settings, hash)
 end

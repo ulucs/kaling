@@ -4,7 +4,7 @@ defmodule Kaling.Redirects do
   """
 
   import Ecto.Query, warn: false
-  import Kaling.Sqids
+  import Kaling.Hashing
   import Kaling.Monad
   alias Kaling.Repo
 
@@ -18,7 +18,7 @@ defmodule Kaling.Redirects do
     redirect
     |> Map.put(
       :short_url,
-      KalingWeb.Endpoint.url() <> "/r/" <> encode!([redirect.id])
+      KalingWeb.Endpoint.url() <> "/r/" <> encode(redirect.id)
     )
   end
 
@@ -74,10 +74,8 @@ defmodule Kaling.Redirects do
 
   """
   def get_hashed_redirect!(hashed_id) do
-    [id] = decode!(hashed_id)
-
     Redirect
-    |> Repo.get!(id)
+    |> Repo.get!(decode(hashed_id))
     |> resolve_redirect()
   end
 
