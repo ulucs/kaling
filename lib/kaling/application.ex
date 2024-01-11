@@ -17,9 +17,9 @@ defmodule Kaling.Application do
       # Start Finch
       {Finch, name: Kaling.Finch},
       # Start the Endpoint (http/https)
-      KalingWeb.Endpoint
-      # Start a worker by calling: Kaling.Worker.start_link(arg)
-      # {Kaling.Worker, arg}
+      KalingWeb.Endpoint,
+      # Start the analytics server
+      {Kaling.Analytics.Server, max_collection: 10}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
