@@ -2,5 +2,5 @@ defmodule Kaling.Hashing do
   @settings Hashids.new()
 
   def encode(number), do: Hashids.encode(@settings, number)
-  def decode(hash), do: Hashids.decode(@settings, hash)
+  def decode!(hash), do: Hashids.decode!(@settings, hash) |> hd()
 end
