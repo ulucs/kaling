@@ -52,7 +52,6 @@ defmodule Kaling.Analytics do
     |> group_by([e], e.redirect_to)
     |> select([e], {e.redirect_to, count(e.id)})
     |> Repo.all()
-    |> arr_default()
     |> Map.new()
     |> update_count_events_by_redirect(update_events)
   end
@@ -71,7 +70,6 @@ defmodule Kaling.Analytics do
     |> group_by([e], e.headers["user-agent"])
     |> select([e], {e.headers["user-agent"], count(e.id)})
     |> Repo.all()
-    |> arr_default()
     |> Map.new()
     |> update_count_events_by_ua(update_events)
   end

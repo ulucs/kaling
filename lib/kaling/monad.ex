@@ -12,11 +12,4 @@ defmodule Kaling.Monad do
   end
 
   def e_map({:error, _} = err, _f), do: err
-
-  @doc """
-  A default for the list monad, since [] basically means the same thing as nil for query results
-  """
-  @spec arr_default(nil | list()) :: []
-  def arr_default(nil), do: []
-  def arr_default(list) when is_list(list), do: list
 end
