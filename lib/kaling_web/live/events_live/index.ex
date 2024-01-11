@@ -40,8 +40,11 @@ defmodule KalingWeb.EventsLive.Index do
      |> assign(:ua_graph, generate_ua_graph(updated_ua))}
   end
 
-  defp generate_analytics_graph(data) do
-    chart = data |> Enum.to_list() |> Contex.Dataset.new() |> Contex.BarChart.new()
+  defp generate_analytics_graph(%{} = data), do: generate_analytics_graph(Map.to_list(data))
+  defp generate_analytics_graph([]), do: no_data()
+
+  defp generate_analytics_graph(data_list) when is_list(data_list) do
+    chart = data_list |> Contex.Dataset.new() |> Contex.BarChart.new()
 
     Plot.new(400, 400, chart)
     |> Plot.titles("Redirect Analytics", "")
@@ -49,10 +52,12 @@ defmodule KalingWeb.EventsLive.Index do
     |> Plot.to_svg()
   end
 
-  defp generate_ua_graph(data) do
+  defp generate_ua_graph(%{} = data), do: generate_ua_graph(Map.to_list(data))
+  defp generate_ua_graph([]), do: no_data()
+
+  defp generate_ua_graph(data_list) when is_list(data_list) do
     chart =
-      data
-      |> Enum.to_list()
+      data_list
       |> Enum.map(&pick_browser/1)
       |> Contex.Dataset.new()
       |> Contex.BarChart.new()
@@ -62,6 +67,8 @@ defmodule KalingWeb.EventsLive.Index do
     |> Plot.axis_labels("User Agents", "Count")
     |> Plot.to_svg()
   end
+
+  defp no_data(), do: {:safe, ["<div>No data yet.</div>"]}
 
   defp pick_browser({ua, ct}),
     do: {
