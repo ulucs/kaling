@@ -33,7 +33,7 @@ defmodule KalingWeb.EventsLive.Index do
 
     {:noreply,
      socket
-     |> stream_insert(:events, event, at: 0)
+     |> stream_insert(:events, event, limit: 10, at: 0)
      |> assign(:link_analytics, updated_link)
      |> assign(:link_graph, generate_analytics_graph(updated_link))
      |> assign(:ua_analytics, updated_ua)

@@ -5,7 +5,6 @@ defmodule Kaling.Analytics do
   alias Plug.Conn
 
   import Ecto.Query
-  import Kaling.Monad, only: [arr_default: 1]
 
   defp parse_ip(ip) do
     case ip do
