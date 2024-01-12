@@ -19,7 +19,7 @@ defmodule Kaling.Application do
       # Start the Endpoint (http/https)
       KalingWeb.Endpoint,
       # Start the analytics server
-      {Kaling.Analytics.Server, max_collection: 10}
+      {Kaling.Analytics.Server, max_collection: 500}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

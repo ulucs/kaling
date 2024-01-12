@@ -20,25 +20,23 @@ defmodule Kaling.Analytics.Server do
   Having a larger `max_collection` value will result in more memory usage, but less database writes.
   `max_collection` has an upper limit of 65,535/3 ~ 20,000 due to postgres limits. (using COPY would alleviate
   this) Having a larger `max_relay_time` value will result in less database writes, but more memory usage.
-  Note that any data not persisted to the database will be lost if the process crashes.
-  Configure the opts according to your risk tolerance and database scale.
+  Note that any data not persisted to the database will be lost if the process crashes. Configure the opts
+  according to your risk tolerance and database scale.
 
   ## Examples
 
       iex> Kaling.Analytics.Server.init()
-      {:ok, %{collected: [], max_collection: 1000, max_relay_time: 20, last_relay: 1588617600}}
+      {:ok, %{collected: [], max_collection: 1000, max_relay_time: 20, current_timer: #Reference<0.3372082085.2082082085.2082082085.2082082085>}}
 
   """
   @impl true
   def init(opts \\ []) do
-    schedule_write(opts[:max_relay_time] || 20)
-
     {:ok,
      %{
        collected: [],
        max_collection: opts[:max_collection] || 1000,
        max_relay_time: opts[:max_relay_time] || 20,
-       last_relay: :os.system_time(:second)
+       current_timer: Process.send_after(self(), :write_db, (opts[:max_relay_time] || 20) * 1000)
      }}
   end
 
@@ -49,10 +47,10 @@ defmodule Kaling.Analytics.Server do
     state = %{state | collected: [event | state.collected]}
 
     if Enum.count(state.collected) >= state.max_collection do
-      send_writes(state)
-    else
-      {:noreply, state}
+      send(self(), :write_db)
     end
+
+    {:noreply, state}
   end
 
   @impl true
@@ -62,26 +60,15 @@ defmodule Kaling.Analytics.Server do
 
   @impl true
   def handle_info(:write_db, state) do
-    if :os.system_time(:second) > state.last_relay + state.max_relay_time do
-      send_writes(state)
-    else
-      schedule_write(state.max_relay_time)
-      {:noreply, state}
-    end
-  end
+    # handle non-timer calls by cancelling the timer, we don't care if it has expired
+    Process.cancel_timer(state.current_timer, async: true, info: false)
+    if Enum.count(state.collected) > 0, do: create_events(state.collected)
 
-  defp send_writes(state) do
-    create_events(state.collected)
-    schedule_write(state.max_relay_time)
-    {:noreply, flush_collected(state)}
-  end
-
-  # this is probably not even necessary, checking when an event is received would probably be enough
-  defp schedule_write(max_relay_time) do
-    Process.send_after(self(), :write_db, max_relay_time * 1000)
-  end
-
-  defp flush_collected(state) do
-    %{state | collected: [], last_relay: :os.system_time(:second)}
+    {:noreply,
+     %{
+       state
+       | collected: [],
+         current_timer: Process.send_after(self(), :write_db, state.max_relay_time * 1000)
+     }}
   end
 end
