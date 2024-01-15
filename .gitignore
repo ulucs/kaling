@@ -1,9 +1,6 @@
 # The directory Mix will write compiled artifacts to.
 /_build/
 
-# ignore local config files for phoenix developers.
-/config/dev.exs
-
 # If you run "mix test --cover", coverage assets end up here.
 /cover/
 

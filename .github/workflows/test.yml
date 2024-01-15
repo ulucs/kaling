@@ -25,8 +25,8 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_USER: ulucs # cba editing config/test.exs
-          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
