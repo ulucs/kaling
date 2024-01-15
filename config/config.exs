@@ -20,6 +20,15 @@ config :kaling, KalingWeb.Endpoint,
   pubsub_server: Kaling.PubSub,
   live_view: [signing_salt: "HBqMs/3u"]
 
+# Having a larger `max_collection` value will result in more memory usage, but less database writes.
+# `max_collection` has an upper limit of 65,535/3 ~ 21,000 due to postgres limits. (using COPY would alleviate
+# this) Having a larger `max_relay_time` value will result in less database writes, but more memory usage.
+# Note that any data not persisted to the database will be lost if the process crashes. Configure the opts
+# according to your risk tolerance and database scale.
+config :kaling, Kaling.Analytics.Server,
+  max_collection: 10,
+  max_relay_time: 20
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails

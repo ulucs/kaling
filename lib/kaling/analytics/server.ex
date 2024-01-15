@@ -10,33 +10,29 @@ defmodule Kaling.Analytics.Server do
 
   use GenServer
 
+  defp max_collection, do: Application.get_env(:kaling, __MODULE__)[:max_collection] || 100
+  defp max_relay_time, do: Application.get_env(:kaling, __MODULE__)[:max_relay_time] || 20
+
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
+  @spec init() :: {:ok, %{collected: [], current_timer: reference()}}
   @doc """
   Initializes the GenServer state.
-
-  Having a larger `max_collection` value will result in more memory usage, but less database writes.
-  `max_collection` has an upper limit of 65,535/3 ~ 20,000 due to postgres limits. (using COPY would alleviate
-  this) Having a larger `max_relay_time` value will result in less database writes, but more memory usage.
-  Note that any data not persisted to the database will be lost if the process crashes. Configure the opts
-  according to your risk tolerance and database scale.
 
   ## Examples
 
       iex> Kaling.Analytics.Server.init()
-      {:ok, %{collected: [], max_collection: 1000, max_relay_time: 20, current_timer: #Reference<0.3372082085.2082082085.2082082085.2082082085>}}
+      {:ok, %{collected: [], current_timer: #Reference<0.3372082085.2082082085.2082082085.2082082085>}}
 
   """
   @impl true
-  def init(opts \\ []) do
+  def init(_opts \\ []) do
     {:ok,
      %{
        collected: [],
-       max_collection: opts[:max_collection] || 1000,
-       max_relay_time: opts[:max_relay_time] || 20,
-       current_timer: Process.send_after(self(), :write_db, (opts[:max_relay_time] || 20) * 1000)
+       current_timer: Process.send_after(self(), :write_db, max_relay_time() * 1000)
      }}
   end
 
@@ -46,7 +42,7 @@ defmodule Kaling.Analytics.Server do
     PubSub.broadcast(Kaling.PubSub, "events:user:#{event.user_id}", {:new_event, event})
     state = %{state | collected: [event | state.collected]}
 
-    if Enum.count(state.collected) >= state.max_collection do
+    if Enum.count(state.collected) >= max_collection() do
       send(self(), :write_db)
     end
 
@@ -68,7 +64,12 @@ defmodule Kaling.Analytics.Server do
      %{
        state
        | collected: [],
-         current_timer: Process.send_after(self(), :write_db, state.max_relay_time * 1000)
+         current_timer:
+           Process.send_after(
+             self(),
+             :write_db,
+             max_relay_time() * 1000
+           )
      }}
   end
 end
