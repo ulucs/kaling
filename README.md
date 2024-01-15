@@ -32,4 +32,5 @@ launch on the free tier (it tries to launch a second machine for running the dep
 runs migrations before launching the app). Since docker is configured, it can be deployed almost anywhere.
 
 Github Actions is configured to deploy on pushes to main and run tests when pull requests that target main are
-created.
+created. This does not fully correspond with the requirements, but I'd rather not have untested code on the
+main branch.

@@ -18,14 +18,15 @@ jobs:
       - name: Install Mix depencies
         run: mix deps.get
       - name: ====> test
-        run: mix coveralls.html
+        run: mix test
     services:
       postgres:
         image: postgres:14
         ports:
           - 5432:5432
         env:
-          POSTGRES_USER: ulucs # cba editing config/test.exs
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
