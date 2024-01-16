@@ -22,7 +22,7 @@ defmodule Kaling.Analytics do
       user_id: redirect.user_id,
       redirected_from: redirect.short_url,
       redirect_to: redirect.redirect_to,
-      created_at: DateTime.utc_now(:second)
+      created_at: DateTime.utc_now()
     }
   end
 
